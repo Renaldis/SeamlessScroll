@@ -1,37 +1,3 @@
-# InfiniteScroll Component (Next.js + TypeScript)
-
-Komponen ini memungkinkan scroll horizontal tak terbatas (infinite loop) dengan dukungan drag-to-scroll tanpa menampilkan scrollbar.
-Cocok untuk carousel, list card, showcase produk, atau konten horizontal lain yang ingin dibuat seamless.
-
-## 📦 Instalasi & Struktur
-
-Tidak perlu install library tambahan, cukup buat file komponen dan utility CSS.
-
-#### 1. Tambahkan Utility CSS di globals.css atau tailwind.css
-
-```css
-@layer utilities {
-  .grab {
-    cursor: grab;
-  }
-  .grabbing {
-    cursor: grabbing;
-  }
-}
-
-.no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-```
-
-#### 2. Buat Komponen InfiniteScroll.tsx
-
-```typescript
 "use client";
 
 import React, { ReactNode, useEffect, useRef, useState } from "react";
@@ -51,7 +17,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   pauseOnHover = true,
   draggable = true,
 }) => {
-  const containerRef = useRef < HTMLDivElement > null;
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -140,30 +106,3 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
 };
 
 export default InfiniteScroll;
-```
-
-#### 3. Contoh Pemakaian
-
-```typescript
-import InfiniteScroll from "@/components/InfinityScroll";
-
-export default function Home() {
-  return (
-    <InfiniteScroll speed={1} pauseOnHover={true}>
-      {[1, 2, 3, 4, 5, 6].map((item, idx) => (
-        <div
-          key={idx}
-          className="bg-gray-200 p-20 w-[500px] flex items-center justify-center text-2xl font-bold"
-        >
-          {item}
-        </div>
-      ))}
-    </InfiniteScroll>
-  );
-}
-```
-
-## Infinite Scroll Component
-
-Demo Infinite Scroll:
-![Infinite Scroll Demo](/public/output.gif)
