@@ -8,6 +8,8 @@ interface InfiniteScrollProps {
   gap?: number;
   pauseOnHover?: boolean;
   draggable?: boolean;
+  direction?: "left" | "right";
+  className?: string;
 }
 
 const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
@@ -16,6 +18,8 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   gap = 2,
   pauseOnHover = true,
   draggable = true,
+  direction = "right",
+  className = "",
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -30,9 +34,18 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
     if (!containerRef.current) return;
 
     let animationFrame: number;
-    const step = () => {
+    let lastTime = performance.now();
+
+    const step = (now: number) => {
+      if (!containerRef.current) return;
+
+      const deltaTime = (now - lastTime) / 16.67; // 16.67ms = kira2 1 frame @60fps
+      lastTime = now;
+
       if (!isPaused && !isDragging && containerRef.current) {
-        containerRef.current.scrollLeft += speed;
+        const distance = speed * deltaTime;
+        containerRef.current.scrollLeft +=
+          direction === "right" ? distance : -distance;
         handleLoop();
       }
       animationFrame = requestAnimationFrame(step);
@@ -42,16 +55,21 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
       const container = containerRef.current;
       if (!container) return;
       const segmentWidth = container.scrollWidth / 3;
-      if (container.scrollLeft >= segmentWidth * 2) {
-        container.scrollLeft -= segmentWidth;
-      } else if (container.scrollLeft <= 0) {
-        container.scrollLeft += segmentWidth;
+
+      if (direction === "right") {
+        if (container.scrollLeft >= segmentWidth * 2) {
+          container.scrollLeft -= segmentWidth;
+        }
+      } else {
+        if (container.scrollLeft <= 0) {
+          container.scrollLeft += segmentWidth;
+        }
       }
     };
 
     animationFrame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animationFrame);
-  }, [isPaused, isDragging, speed]);
+  }, [isPaused, isDragging, speed, direction]);
 
   const handleDown = (clientX: number) => {
     if (!draggable) return;
@@ -87,7 +105,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
       ref={containerRef}
       className={`flex overflow-x-scroll no-scrollbar ${
         draggable ? (isDragging ? "grabbing" : "grab") : ""
-      }`}
+      } ${className}`}
       style={{ columnGap: `${gap}rem` }}
       onMouseDown={(e) => handleDown(e.pageX)}
       onMouseMove={(e) => handleMove(e.pageX)}
